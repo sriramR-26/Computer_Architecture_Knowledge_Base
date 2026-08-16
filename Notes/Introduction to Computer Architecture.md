@@ -1,205 +1,249 @@
+SYSTEMVERILOG — UNPACKED / MULTIDIMENSIONAL / DYNAMIC ARRAYS
+══════════════════════════════════════════════════════════════
 
-Arrays can be stored in 32- bit unpacked words or 32-bit packed words which goes for an optimization route not necessarily going for the coding aspect
-
+CODE
+────
 ```systemverilog
-int arr[5];
-bit [31:0] parr; // here is a comment that will change the way this looks
-
-initial begin
-	
-end
-```
-
-
-
-```
 module tb;
 
-    function void disp_msg(input string tag, input string msg);
+    function void disp_msg(input string tag, input string msg);
+        $display($sformatf("[%0t][%0s]: %0s", $time, tag, msg));
+    endfunction
 
-        $display($sformatf("[%0t][%0s]: %0s", $time, tag, msg));
+    bit [7:0] b_unpack [4];
 
-    endfunction
+    int arr[5];
+
+    initial begin
+        arr = '{3,3,5,2,1};
+        disp_msg("Block 1", $sformatf("%0p",arr));
+
+        arr[0:2] = '{5,3,1};
+        disp_msg("Block 1", $sformatf("%0p",arr));
+
+        arr = '{5{2}};
+        disp_msg("Block 1", $sformatf("%0p",arr));
+
+        arr = '{default:5};
+        disp_msg("Block 1", $sformatf("%0p",arr));
+    end
+
+    int md_array[2][4];
+
+    initial begin
+        md_array = '{'{3,4,31,1}, '{45,1,4,1}};
+
+        foreach(md_array[i])
+            disp_msg("Block 2", $sformatf("%0p",md_array[i]));
+
+        foreach(md_array[i,j])
+            disp_msg("Block 2", $sformatf("%0d",md_array[i][j]));
+    end
+
+    bit [3:0][7:0] barray [4];
+
+    initial begin
+        barray[1] = '{8'h22, 8'h23, 8'h44, 8'h12};
+        barray[2][1] = 8'h90;
+
+        #10 barray[3][2][1:0] = 2'd2;
+
+        foreach(barray[i]) begin
+            disp_msg(
+                "Block 3",
+                $sformatf("BARRAY[%0d]: %0h", i, barray[i])
+            );
+
+            foreach(barray[,j]) begin
+                disp_msg(
+                    "Block 3",
+                    $sformatf(
+                        "BARRAY[%0d][%0d]: %0h",
+                        i, j, barray[i][j]
+                    )
+                );
+            end
+        end
+    end
+
+    initial begin
+        @(barray[3]);
+        disp_msg("Block 4", "'barray' finally changed!");
+    end
+
+    int md_darray[][];
+
+    initial begin
+        md_darray = new[4];
+
+        foreach(md_darray[i]) begin
+            md_darray[i] = new[i+1];
+
+            foreach(md_darray[,j]) begin
+                md_darray[i][j] = i+j;
+            end
+
+            disp_msg(
+                "BLOCK DYNAMIC ARRAY",
+                $sformatf("%0p", md_darray[i])
+            );
+        end
+    end
+
+endmodule
 ```
 
-    // Usually system-verilog simulators store each element of an unpacked array in a 32-bit word boundary.
+TEXT / CONCEPTS
+──────────────────────────────────────────────────────────────
 
-    // So a byte, shortint, and int are all stored in a single word whereas longint takes 2 word.
+Storage of unpacked arrays
+───────────────────────────
+Usually, SystemVerilog simulators store each element of an
+unpacked array using a 32-bit word boundary.
 
-    bit [7:0] b_unpack [4]; // Unpacked array of 4 elements each is 8 bits wide
+Therefore, a byte, shortint, and int may each occupy a single
+32-bit word, while a longint may occupy two words.
 
-    // The above variable will be stored in 4 32-bit word spaces instead of a single 32-bit word divided into 4 parts.
+For example:
 
-    // On the same note, simulators, usually store 4-state types like 'logic' in two or more consecutive words (twice of 2-state variables)
+    bit [7:0] b_unpack [4];
 
-    //=======================
+This is an unpacked array of 4 elements, each 8 bits wide.
 
-    // Accessing an out of bound index returns the default value of the array type.
+The array may therefore be stored using 4 separate 32-bit
+word spaces rather than packing all four 8-bit elements into
+one 32-bit word.
 
-    // Applies for all array types - fixed, dynamic, queue or associative
+Simulators also usually store 4-state types such as logic
+using additional storage compared with equivalent 2-state
+types.
 
-    //=======================
+NOTE:
+This is simulator implementation/storage behavior and should
+not be treated as a SystemVerilog language guarantee.
 
-    //=======================
 
-    // How to declare an array literal?
+Out-of-bounds access
+────────────────────
+Accessing an out-of-bounds index returns the default value of
+the array's element type.
 
-    int arr[5];
+This applies to fixed, dynamic, queue, and associative arrays,
+subject to the specific semantics of each array type.
 
-    initial begin
 
-        arr = '{3,3,5,2,1};
+Array literals
+──────────────
+An array literal can be used to initialize or assign an array.
 
-        disp_msg("Block 1", $sformatf("%0p",arr));       
+    arr = '{3,3,5,2,1};
 
-        arr[0:2] = '{5,3,1};
+Assigns individual values.
 
-        disp_msg("Block 1", $sformatf("%0p",arr));
+    arr[0:2] = '{5,3,1};
 
-        arr = '{5{2}};
+Assigns values to an array slice.
 
-        disp_msg("Block 1", $sformatf("%0p",arr));
+    arr = '{5{2}};
 
-        arr = '{default:5}; // All elements are set to 5
+Replicates the value 2 five times.
 
-        disp_msg("Block 1", $sformatf("%0p",arr));
+    arr = '{default:5};
 
-    end
+Sets all elements to 5.
 
-    //=======================
 
-    //=======================
+Multidimensional arrays
+───────────────────────
+A multidimensional array can be initialized using nested
+array literals.
 
-    // How to initialize and walk through a muti dimensional array
+    int md_array[2][4];
 
-    int md_array[2][4];
+foreach() iterates according to the range defined in each
+particular dimension.
 
-    initial begin
+If the array is declared as:
 
-        md_array = '{'{3,4,31,1}, '{45,1,4,1}};
+    int md_array[1:0][3:0];
 
-        foreach(md_array[i]) disp_msg("Block 2", $sformatf("%0p",md_array[i]));
+then the values of i and j are traversed in descending order
+according to those declared ranges.
 
-        foreach(md_array[i,j]) disp_msg("Block 2", $sformatf("%0d",md_array[i][j]));
+Observation:
+Adding an empty $display produces a new line.
 
-    end
 
-    // foreach() interates as per the range defined in that particular dimension.
+Packed vs unpacked dimensions
+─────────────────────────────
+For:
 
-    // If md_array was defined as md_array[1:0][3:0] then values of i and j will be in descending order
+    bit [3:0][7:0] barray [4];
 
-    // Interesting fact: Adding an empty $display returns a new line
+[4] is an unpacked dimension.
 
-    //=======================
+[3:0][7:0] are packed dimensions.
 
-    //=======================
+Therefore there are 4 unpacked elements, and each element is
+32 bits wide.
 
-    // Visualization of unpacked arrays:
+Each 32-bit element consists of four 8-bit packed blocks.
 
-    bit [3:0][7:0] barray [4];
 
-    // 4 elements each containing 4 blocks and each block has 8 sub-blocks of 1 bit width
+Waiting for array changes
+─────────────────────────
+The @ operator is applicable to scalar values and packed
+arrays.
 
-    // While the elements are "unpacked", the blocks and sub-blocks here are packed
+Therefore, an unpacked array itself cannot simply be used as
+the event expression.
 
-    // So total space acquired might be 4 32-words in total
+However, a particular packed element can be used:
 
-    initial begin
+    @(barray[3]);
 
-        barray[1] = '{8'h22, 8'h23, 8'h44, 8'h12};
+Here, barray[3] is a packed array.
 
-        barray[2][1] = 8'h90;
 
-        #10 barray[3][2][1:0] = 2'd2;
+Dynamic arrays
+──────────────
+Dynamic arrays can be created at runtime.
 
-        foreach(barray[i]) begin
+Their size cannot be changed by simply appending elements.
+To change their size, a new dynamic array must be allocated.
 
-            disp_msg("Block 3",$sformatf("BARRAY[%0d]: %0h", i, barray[i]));
+    int arr[];
 
-            foreach(barray[,j]) begin
+    arr = new[4];
 
-                disp_msg("Block 3",$sformatf("BARRAY[%0d][%0d]: %0h", i, j, barray[i][j]));
+    arr = new[8](arr);
 
-            end
+new[8](arr) creates a new array and copies the existing
+elements into it.
 
-        end
+This has a performance cost because the existing contents
+must be copied.
 
-    end
+    arr = new[10];
 
-    // If we want to wait for a change in an array, we we have to use packed array.
+This creates a new array without preserving the previous
+contents.
 
-    // The operator "@" is applicable only for scalar values and packed arrays.
 
-    // But we can block on a particular element of the array like barray[3]
+Multidimensional dynamic arrays
+───────────────────────────────
+A multidimensional dynamic array can contain dynamic arrays
+of different lengths.
 
-    initial begin
+For example:
 
-        @(barray[3]);
+    int md_darray[][];
 
-        disp_msg("Block 4", "'barray' finally changed!");
+can be structured such that:
 
-    end   
+    md_darray[0] → 1 element
+    md_darray[1] → 2 elements
+    md_darray[2] → 3 elements
+    md_darray[3] → 4 elements
 
-    //=======================
-
-    //=======================
-
-    // Dynamic arrays
-
-    // They can be created during run time but if we want to change their sizes, we need to re-create them. We can't ust append.
-
-    // int arr[];
-
-    // int darr[] = '{2,3,2,5,72,4,1,4}; //  Dynamic array
-
-    // int sarr[4];
-
-    // initial begin
-
-            // sarr = '{3,5,3,1};
-
-            // arr = new[4](saar);
-
-            // disp_msg("MISC BLOCK", $sformatf("%0p", arr));
-
-            // arr = new[8](arr); // copies previous elements but this has a performance issue has it copies the entire contents of an array
-
-            // arr = new[10]; // Deletes previous elements
-
-    // end
-
-    // Muti-dimensional arrays can be arrays of varrying length arrays.
-
-    // If we have md_darray[][], then we can have md_array[0].size = 1, md_array[1].size = 5,....
-
-    int md_darray[][];
-
-    initial begin
-
-        md_darray = new[4];
-
-        foreach (md_darray[i]) begin
-
-            md_darray[i] = new[i+1];
-
-            foreach(md_darray[,j]) begin
-
-                md_darray[i][j] = i+j;
-
-            end
-
-            disp_msg("BLOCK DYNAMIC ARRAY", $sformatf("%0p", md_darray[i]));
-
-        end
-
-    end
-
-Endmodule
-
-int arr[5];
-
-bit [31:0] parr;
-
-initial begin
-
-end
+Each md_darray\[i\] is itself a dynamic array.
