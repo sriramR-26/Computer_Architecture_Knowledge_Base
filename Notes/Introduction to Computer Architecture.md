@@ -3,7 +3,7 @@ Arrays can be stored in 32- bit unpacked words or 32-bit packed words which goes
 
 ```systemverilog
 int arr[5];
-bit [31:0] parr;
+bit [31:0] parr; // here is a comment 
 
 initial begin
 	
