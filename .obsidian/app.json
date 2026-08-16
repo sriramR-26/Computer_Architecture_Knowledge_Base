@@ -3,5 +3,6 @@
   "newFileFolderPath": "Attachments",
   "attachmentFolderPath": "Attachments",
   "useMarkdownLinks": true,
-  "promptDelete": false
+  "promptDelete": false,
+  "newLinkFormat": "relative"
 }
