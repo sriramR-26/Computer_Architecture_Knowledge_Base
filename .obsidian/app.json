@@ -1,5 +1,7 @@
 {
   "newFileLocation": "root",
   "newFileFolderPath": "Attachments",
-  "attachmentFolderPath": "Attachments"
+  "attachmentFolderPath": "Attachments",
+  "useMarkdownLinks": true,
+  "promptDelete": false
 }
