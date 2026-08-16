@@ -1,6 +1,11 @@
 
-# Let us begin
-Here is a test text and a test image to see if it works
+Arrays can be stored in 32- bit unpacked words or 32-bit packed words which goes for an optimization route not necessarily going for the coding aspect
 
-![](../Attachments/Pasted%20image%2020260816092834.png)
+```systemverilog
+int arr[5];
+bit [31:0] parr;
 
+initial begin
+	
+end
+```
