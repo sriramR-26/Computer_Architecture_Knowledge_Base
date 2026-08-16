@@ -11,14 +11,10 @@
             "id": "0112959ee9fa7e6e",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Introduction to Computer Architecture.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "Introduction to Computer Architecture"
+              "title": "New tab"
             }
           }
         ]
@@ -99,7 +95,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Introduction to Computer Architecture.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -118,7 +113,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Introduction to Computer Architecture.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -161,7 +155,6 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Introduction to Computer Architecture.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -190,8 +183,10 @@
   },
   "active": "0112959ee9fa7e6e",
   "lastOpenFiles": [
-    "Attachments/Introduction to Computer Architecture.md",
     "Introduction to Computer Architecture.md",
+    "Notes/Introduction to Computer Architecture.md",
+    "Notes",
+    "Attachments/Introduction to Computer Architecture.md",
     "Attachments"
   ]
 }
